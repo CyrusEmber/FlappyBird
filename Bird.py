@@ -18,6 +18,7 @@ class Bird:
         circle = shapes.Circle(x, y, 100, color=(50, 225, 30), batch=self.batch)
         bird = pyglet.sprite.Sprite(circle, batch=self.batch)
 
+
         @window.event
         def on_key_press(symbol, modifiers):
             if symbol == key.SPACE:
