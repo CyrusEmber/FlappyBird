@@ -32,7 +32,7 @@ def center_high_pillar(image):
     image.anchor_y = 0
 
 
-def birds(batch=None):
+def new_birds(batch=None):
     bird_image = pyglet.resource.image('bird.png')
     bird_image.width = 100
     bird_image.height = 100

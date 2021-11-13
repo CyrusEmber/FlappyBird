@@ -1,5 +1,7 @@
 import pyglet
 from pyglet.window import key
+from pyglet.window.key import MOD_SHIFT
+
 from load import *
 
 game_window = pyglet.window.Window(1600, 1000)
@@ -7,14 +9,16 @@ pyglet.resource.path = ['../assets']
 pyglet.resource.reindex()
 
 main_batch = pyglet.graphics.Batch()
+pillar_batch = pyglet.graphics.Batch()
+
 label = labels(main_batch)
-pillars = new_pillar(main_batch)
-bird = birds(main_batch)
+pillars = new_pillar(pillar_batch)
+bird = new_birds(main_batch)
 completion = False
 score = 0
 time_count = 0
 flag = 0
-birds = [bird]
+birds_obj = [bird]
 
 
 def init():
@@ -28,17 +32,25 @@ def on_draw():
     global completion
     game_window.clear()
     main_batch.draw()
-    if not completion:
-        game_window.push_handlers(bird.key_handler)
+    pillar_batch.draw()
+    for b in birds_obj:
+        game_window.push_handlers(b.key_handler)
+
+
+@game_window.event
+def on_key_press(symbol, modifiers):
+    if modifiers & MOD_SHIFT:
+        if symbol == key.N:
+            birds_obj.extend([new_birds(main_batch)])
 
 
 def update(dt):
-    global completion, score, time_count, flag
-    player_dead = False
+    global completion, score, time_count, flag, pillars_obj
     time_count += 1
+    print(len(pillars))
 
     # update
-    for b in birds:
+    for b in birds_obj:
         b.update(dt)
         # check collide
         if b.collide_down(pillars[0]) or b.collide_up(pillars[1]):
@@ -53,27 +65,34 @@ def update(dt):
     for to_remove in [obj for obj in pillars if obj.dead]:
         to_remove.delete()
         pillars.remove(to_remove)
-    for to_remove in [obj for obj in birds if obj.dead]:
+    for to_remove in [obj for obj in birds_obj if obj.dead]:
         to_remove.delete()
-        birds.remove(to_remove)
+        birds_obj.remove(to_remove)
 
     # add new pillars and reset flag for score
     if time_count % 240 == 0:
+        time_count = 0
         flag = 0
-        add_pillars = new_pillar(main_batch)
+        add_pillars = new_pillar(pillar_batch)
         pillars.extend(add_pillars)
 
     # score
-    if pillars[0].check_score() and flag == 0 and len(birds) > 0:
+    if flag == 0 and len(birds_obj) > 0 and pillars[0].check_score():
         # print(time_count)
         flag += 1
         score += 1
         label.text = "Score: " + str(int(score))
 
 
-# event_logger = pyglet.window.event.WindowEventLogger()
-# window.push_handlers(event_logger)
+def update_pillar():
+    global pillars_obj
+    # add new pillars and reset flag for score
+    if time_count % 240 == 0:
+        add_pillars = new_pillar(pillar_batch)
+        pillars.extend(add_pillars)
+
 
 if __name__ == '__main__':
+    init()
     pyglet.clock.schedule_interval(update, 1 / 120.0)
     pyglet.app.run()
