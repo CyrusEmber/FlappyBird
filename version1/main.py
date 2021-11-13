@@ -14,7 +14,7 @@ pyglet.resource.reindex()
 # score_label = pyglet.text.Label(text="Score: 0", x=10, y=460)
 bird = birds()
 label = labels()
-pillars = pillars()
+
 
 
 @window.event
@@ -28,8 +28,7 @@ def on_draw():
     window.clear()
     bird.draw()
     label.draw()
-    for p in pillars:
-        p.draw()
+
 
 
 def move(dt, velocity, sprite, gravity=-10, y=0):
