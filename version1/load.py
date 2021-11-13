@@ -14,29 +14,55 @@ _WIDTH = 1600
 _HEIGHT = 1000
 
 
-def birds():
-    new_bird = bird.Bird(pyglet.resource.image('bird.png'), x=300, y=300)
-    new_bird.scale = 0.5
-    # print(new_bird.height) = 95
+def center_image(image):
+    """Sets an image's anchor point to its center"""
+    image.anchor_x = image.width // 2
+    image.anchor_y = image.height // 2
+
+
+def center_low_pillar(image):
+    """Sets an image's anchor point to its center"""
+    image.anchor_x = image.width // 2
+    image.anchor_y = image.height
+
+
+def center_high_pillar(image):
+    """Sets an image's anchor point to its center"""
+    image.anchor_x = image.width // 2
+    image.anchor_y = 0
+
+
+def birds(batch=None):
+    bird_image = pyglet.resource.image('bird.png')
+    bird_image.width = 100
+    bird_image.height = 100
+    center_image(bird_image)
+    new_bird = bird.Bird(bird_image, x=200, y=500, batch=batch)
+    # print(new_bird.height) = 100
     return new_bird
 
 
-def labels():
-    score_label = pyglet.text.Label(text="Score: 0", x=10, y=500)
+def labels(batch=None):
+    score_label = pyglet.text.Label(text="Score: 0", x=10, y=500, batch=batch)
     return score_label
 
 
-def pillars():
+def new_pillar(batch=None):
     # without acceleration
-    new_pillars = []
+    pillar_low_image = pyglet.resource.image('downPillar.png')
+    pillar_high_image = pyglet.resource.image('upPillar.png')
+    pillar_low_image.width = 150
+    pillar_high_image.width = 150
+    pillar_low_image.height = 1000
+    pillar_high_image.height = 1000
+    center_low_pillar(pillar_low_image)
+    center_high_pillar(pillar_high_image)
+    new_pillars = [0]*2
     # while game_fail:
     #     time.sleep(2)
-    new_pillar_lower = random.randint(100, _HEIGHT - 100)
-    square_low = shapes.Rectangle(x=_WIDTH, y=200, width=200, height=new_pillar_lower, color=(0, 0, 0))
-    square_high = shapes.Rectangle(x=_WIDTH, y=800, width=200, height=_HEIGHT - new_pillar_lower, color=(0, 0, 0))
-    new_pillars[0] = pillar.Pillar(square_low, x=_WIDTH, y=200)
-    new_pillars[1] = pillar.Pillar(square_low, x=_WIDTH, y=800)
-
+    new_pillar_lower = random.randint(100, _HEIGHT - 300)
+    new_pillars[0] = pillar.Pillar(pillar_low_image, x=_WIDTH + pillar_low_image.width / 2, y=new_pillar_lower, batch=batch)
+    new_pillars[1] = pillar.Pillar(pillar_high_image, x=_WIDTH + pillar_low_image.width / 2, y=new_pillar_lower + 300, batch=batch)
     return new_pillars
 
 
