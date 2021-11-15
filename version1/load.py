@@ -42,8 +42,8 @@ def new_birds(batch=None):
     return new_bird
 
 
-def labels(batch=None):
-    score_label = pyglet.text.Label(text="Score: 0", x=10, y=500, batch=batch)
+def labels(x=10, y=500, batch=None):
+    score_label = pyglet.text.Label(text="Score: 0", x=x, y=y, batch=batch)
     return score_label
 
 

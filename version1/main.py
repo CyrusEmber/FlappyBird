@@ -1,7 +1,7 @@
 import pyglet
 from pyglet.window import key
 from pyglet.window.key import MOD_SHIFT
-from CGP import Individual, create_pop
+from CGP import Individual, create_pop, evolve
 
 from load import *
 
@@ -13,24 +13,64 @@ main_batch = pyglet.graphics.Batch()
 pillar_batch = pyglet.graphics.Batch()
 ai_batch = pyglet.graphics.Batch()
 
-label = labels(main_batch)
+label_score = labels(batch=main_batch)
+label_alive = labels(y=520, batch=main_batch)
+label_best = labels(y=540, batch=main_batch)
+label_generation = labels(y=560, batch=main_batch)
 pillars = new_pillar(pillar_batch)
-bird = new_birds(main_batch)
-ai_bird = new_ai_birds(individual=create_pop(1)[0], batch=ai_batch)
+
 completion = False
 score = 0
 best_score = 0  # FIXME
 time_count = 0
 flag = 0
-birds_obj = [bird]
-ai_birds_obj = [ai_bird]
+alive = 0
+generation = 1
+ai_num = ""
+pop = None
+
+birds_obj = []
+ai_birds_obj = []
+
+
+def create_ai_bird(pops):
+    global alive, ai_num
+    for ind in pops:
+        ai_birds_obj.append(new_ai_birds(individual=ind, batch=ai_batch))
+        alive += 1
+    ai_num = str(alive)
+
+
+def clear_game():
+    global pillars, generation, score, time_count
+    for obj in pillars:
+        obj.delete()
+        pillars.remove(obj)
+    for obj in birds_obj:
+        obj.delete()
+        birds_obj.remove(obj)
+    generation += 1
+    score = 0
+    time_count = 0
+    pillars = new_pillar(pillar_batch)
 
 
 def init():
-    global score
+    global birds_obj, score
 
     score = 0
-    label.text = "Score: " + str(score)
+    label_score.text = "Score: " + str(score)
+
+    birds_obj.append(new_birds(main_batch))
+
+
+def init_pop():
+    global ai_birds_obj, alive, ai_num, pop
+    pop = create_pop(10)
+    create_ai_bird(pop)
+    label_alive.text = "Alive: " + str(alive) + "/" + ai_num
+    label_generation.text = "Generation: " + str(generation)
+    label_best.text = "Best score: " + str(best_score)
 
 
 @game_window.event
@@ -65,7 +105,7 @@ def on_key_press(symbol, modifiers):
 
 
 def update(dt):
-    global completion, score, time_count, flag
+    global completion, score, time_count, flag, alive, pop, best_score
     time_count += 1
 
     # update
@@ -77,9 +117,10 @@ def update(dt):
     for p in pillars:
         p.update(dt)
     for b in ai_birds_obj:
-        b.update(dt)
         if b.collide_down(pillars[0]) or b.collide_up(pillars[1]):
             b.dead = True
+        b.update(dt)
+        # flap or not
         b.check_flap(pillars[0].x, pillars[0].y)
 
     # check pillars out of bounds
@@ -95,11 +136,9 @@ def update(dt):
         to_remove.delete()
         birds_obj.remove(to_remove)
     for to_remove in [obj for obj in ai_birds_obj if obj.dead]:
+        alive -= 1
         to_remove.delete()
         ai_birds_obj.remove(to_remove)
-
-    # check AI bird flap
-
 
     # add new pillars and reset flag for score
     if time_count % 240 == 0:
@@ -108,16 +147,32 @@ def update(dt):
         add_pillars = new_pillar(pillar_batch)
         pillars.extend(add_pillars)
 
+# label
     # score
-    if flag == 0 and len(birds_obj) > 0 and pillars[0].check_score():
+    if flag == 0 and (len(birds_obj) > 0 or len(ai_birds_obj) > 0) and pillars[0].check_score():
         # print(time_count)
         flag += 1
         score += 1
-        label.text = "Score: " + str(int(score))
+        label_score.text = "Score: " + str(int(score))
+    # check alive AI
+    label_alive.text = "Alive: " + str(alive) + "/" + ai_num
+    # check best score
+    if score > best_score:
+        best_score = score
+        label_best.text = "Best score: " + str(best_score)
+    # check generation
+    label_generation.text = "Generation: " + str(generation)
+
+    # evolve AI
+    if alive == 0:
+        pop = evolve(pop, 0.03, 4, 6)
+        clear_game()
+        create_ai_bird(pop)
 
 
 if __name__ == '__main__':
     init()
+    init_pop()
     # init_ai()
 
     pyglet.clock.schedule_interval(update, 1 / 120.0)

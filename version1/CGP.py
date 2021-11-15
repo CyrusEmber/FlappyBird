@@ -65,7 +65,7 @@ class Individual:
                     if node.input[i] >= 0:
                         self.nodes[node.input[i]].active = True
 
-        print("active nodes: ", active_num)
+        # print("active nodes: ", active_num)
 
     def eval(self, *args):
         if not self._active_determined:
@@ -115,6 +115,7 @@ def evolve(pop, mutate_rate, mu, lambda_):
     """
     pop = sorted(pop, key=lambda individual: individual.score)
     parents = pop[-mu:]
+    print(parents[-1].score)
     # generate lambda new children via mutation
     offspring = []
     for i in range(lambda_):

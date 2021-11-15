@@ -17,7 +17,7 @@ class AIBird(bird.Bird):
             self.individual.score = self.score
 
     def check_flap(self, x, y):
-        y_input = self.y - y - SPACE / 2
+        y_input = self.y - y - SPACE / 2 + 50
         x_input = x - self.x
         if self.individual.eval(x_input, y_input) > 0:
             self.velocityY = JUMP_SPEED
