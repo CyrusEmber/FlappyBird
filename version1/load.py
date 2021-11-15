@@ -2,11 +2,11 @@ import time
 
 import pyglet
 import random
-
-from pyglet import shapes
-
 import bird
 import pillar
+import AIbird
+from settings import SPACE
+from version1.CGP import create_pop
 
 pyglet.resource.path = ['../assets']
 pyglet.resource.reindex()
@@ -62,8 +62,18 @@ def new_pillar(batch=None):
     #     time.sleep(2)
     new_pillar_lower = random.randint(100, _HEIGHT - 300)
     new_pillars[0] = pillar.Pillar(pillar_low_image, x=_WIDTH + pillar_low_image.width / 2, y=new_pillar_lower, batch=batch)
-    new_pillars[1] = pillar.Pillar(pillar_high_image, x=_WIDTH + pillar_low_image.width / 2, y=new_pillar_lower + 300, batch=batch)
+    new_pillars[1] = pillar.Pillar(pillar_high_image, x=_WIDTH + pillar_low_image.width / 2, y=new_pillar_lower + SPACE, batch=batch)
     return new_pillars
+
+
+def new_ai_birds(individual, batch=None):
+    bird_image = pyglet.resource.image('bird.png')
+    bird_image.width = 100
+    bird_image.height = 100
+    center_image(bird_image)
+    new_bird = AIbird.AIBird(img=bird_image, individual=individual, x=200, y=500, batch=batch)
+
+    return new_bird
 
 
 def game_fail(player_bird):
